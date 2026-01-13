@@ -4,6 +4,49 @@ This module starts the executable in '../ur3e_mockup/' folder named 'ur3e_mockup
 
 import subprocess
 import os
+import sys
+import platform
+
+
+def _get_executable_path():
+    """
+    Detects the OS type and returns the path to the appropriate ur3e_mockup executable.
+
+    Returns:
+        str: Path to the platform-specific executable
+
+    Raises:
+        OSError: If the OS is not supported or executable not found
+    """
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    ur3e_mockup_dir = os.path.join(current_dir, "../ur3e_mockup")
+
+    system = platform.system()
+
+    if system == "Darwin":
+        # macOS (Intel and ARM/Apple Silicon)
+        executable_name = "ur3e_mockup_mac_arm"
+        executable_path = os.path.join(ur3e_mockup_dir, executable_name)
+    elif system == "Windows":
+        # Windows
+        executable_name = "ur3e_mockup_win.exe"
+        executable_path = os.path.join(ur3e_mockup_dir, executable_name)
+    elif system == "Linux":
+        # Linux
+        executable_name = "ur3e_mockup_linux"
+        executable_path = os.path.join(ur3e_mockup_dir, executable_name)
+
+    else:
+        # Other systems
+        raise OSError(
+            f"Unsupported operating system: {system}. "
+            f"Supported systems: Darwin (macOS), Windows, Linux"
+        )
+
+    if not os.path.exists(executable_path):
+        raise FileNotFoundError(f"Executable not found for {system}: {executable_path}")
+
+    return executable_path
 
 
 def start_robot_arm_mockup(ok_queue=None):
@@ -11,12 +54,11 @@ def start_robot_arm_mockup(ok_queue=None):
     Starts the ur3e_mockup executable and keeps it running.
     Handles graceful shutdown via Ctrl+C (SIGINT).
     """
-    # Get the path to the ur3e_mockup executable relative to this file
-    current_dir = os.path.dirname(os.path.abspath(__file__))
-    executable_path = os.path.join(current_dir, "../ur3e_mockup/ur3e_mockup")
-
-    if not os.path.exists(executable_path):
-        raise FileNotFoundError(f"Executable not found: {executable_path}")
+    # Get the platform-specific executable path
+    system = platform.system()
+    print(f"Detected OS: {system}")
+    executable_path = _get_executable_path()
+    print(f"Starting executable: {executable_path}")
 
     # Start the subprocess
     process = subprocess.Popen([executable_path])
