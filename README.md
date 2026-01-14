@@ -2,7 +2,21 @@
 
 Welcome to the UR3e Case Study for the **Engineering Digital Twins** course at Aarhus University.
 
+- [UR3e Digital Twin Case Study](#ur3e-digital-twin-case-study)
+  - [Introduction to the UR3e](#introduction-to-the-ur3e)
+  - [Repository Structure](#repository-structure)
+  - [Getting Started](#getting-started)
+  - [Dependencies](#dependencies)
+  - [Contributing](#contributing)
+
 This repository contains the codebase and examples required to build and interact with a Digital Twin of a Universal Robots UR3e robotic arm. The project allows you to run a virtual mockup of the robot, interact with it via RabbitMQ, and develop your own digital twin components.
+
+## Introduction to the UR3e
+
+The [Universal Robots UR3e](https://www.universal-robots.com/products/ur3e/) is a collaborative robotic arm designed for light industrial applications. It features six degrees of freedom, a payload capacity of 3 kg, and a reach of 500 mm. The UR3e is widely used in research and industry due to its versatility, ease of programming, and safety features.
+![alt text](resources/ur3e.png)
+
+In this case study, you will simulate the UR3e robot using a simplified mockup that communicates via RabbitMQ. You will learn how to control the robot, receive state updates, and build your own digital twin functionalities.
 
 ## Repository Structure
 
