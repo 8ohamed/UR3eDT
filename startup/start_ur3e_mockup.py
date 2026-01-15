@@ -4,7 +4,6 @@ This module starts the executable in '../ur3e_mockup/' folder named 'ur3e_mockup
 
 import subprocess
 import os
-import sys
 import platform
 
 
@@ -33,7 +32,8 @@ def _get_executable_path():
         executable_path = os.path.join(ur3e_mockup_dir, executable_name)
     elif system == "Linux":
         # Linux
-        executable_name = "ur3e_mockup_x86_64"
+        executable_name = "ur3e_mockup_linux_" + platform.machine()
+        print(f"exec_name: {executable_name}")
         executable_path = os.path.join(ur3e_mockup_dir, executable_name)
 
     else:
