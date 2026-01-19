@@ -7,7 +7,7 @@ import os
 import platform
 
 
-def _get_executable_path():
+def _get_executable_path(system, machine):
     """
     Detects the OS type and returns the path to the appropriate ur3e_mockup executable.
 
@@ -19,12 +19,10 @@ def _get_executable_path():
     """
     current_dir = os.path.dirname(os.path.abspath(__file__))
     ur3e_mockup_dir = os.path.join(current_dir, "../ur3e_mockup")
-
-    system = platform.system()
-
+    executable_path = None
     if system == "Darwin":
         # macOS (Intel and ARM/Apple Silicon)
-        executable_name = "ur3e_mockup_mac_arm"
+        executable_name = "ur3e_mockup_macos_" + machine
         executable_path = os.path.join(ur3e_mockup_dir, executable_name)
     elif system == "Windows":
         # Windows
@@ -32,7 +30,7 @@ def _get_executable_path():
         executable_path = os.path.join(ur3e_mockup_dir, executable_name)
     elif system == "Linux":
         # Linux
-        executable_name = "ur3e_mockup_linux_" + platform.machine()
+        executable_name = "ur3e_mockup_linux_" + machine
         print(f"exec_name: {executable_name}")
         executable_path = os.path.join(ur3e_mockup_dir, executable_name)
 
@@ -56,8 +54,9 @@ def start_robot_arm_mockup(ok_queue=None):
     """
     # Get the platform-specific executable path
     system = platform.system()
-    print(f"Detected OS: {system}")
-    executable_path = _get_executable_path()
+    machine = platform.machine()
+    print(f"Detected OS: {system}, Machine: {machine}")
+    executable_path = _get_executable_path(system, machine)
     print(f"Starting executable: {executable_path}")
 
     # Start the subprocess
