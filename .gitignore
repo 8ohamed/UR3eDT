@@ -209,3 +209,6 @@ marimo/_lsp/
 __marimo__/
 
 Assignment/
+
+# Files
+examples/
