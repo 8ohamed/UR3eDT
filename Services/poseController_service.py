@@ -5,6 +5,10 @@
 #2. Calculate/Determine $q_{target}$
 #3. Send $q_{target}$ via rabbitMQ to mockup
 
+# PRE
+# 1. start rabbitmq
+# 2. start mockup
+
 # Add the project root to Python's path
 import sys
 from pathlib import Path
@@ -46,10 +50,7 @@ class PoseControllerService():
             print(f"Failed to connect [{e}]")
             
         self.rmq.subscribe(routing_key=protocol.ROUTING_KEY_STATE, on_message_callback=self.update_robot_state)
-        
-    # def send_config(self):
-    #     #
-            
+                   
     def update_robot_state(self, ch, method, properties, body):
         with self.condition_idle:
             self.robot_state = body
@@ -119,10 +120,10 @@ class PoseControllerService():
 
                 try:
                     print("\nROBOT REACHED TARGET")
-                    print("\tQ_ACTUAL:\t",numpy.round(self.jointConfig.q_actual,3))
+                    print("\tQ_ACTUAL:\t",numpy.round(self.jointConfig.q_actual,5))
                     res= self.determine_config(preset)
                     if res is not None:
-                        print("\tQ_TARGET:\t",numpy.round(res.q,3))
+                        print("\tQ_TARGET:\t",numpy.round(res.q,5))
                         self.send_target_config()
                 except Exception as e:
                     print(f"Error: {e}")
@@ -133,11 +134,40 @@ class PoseControllerService():
             preset += 1
             if preset > 3:
                 preset = 1
+
+    def single_movement(self):
+        while True:
+            print("\n\n*** PRESETS ***\n1: [-0.4, -0.35, 0.1]\n2: [0.4, -0.2, 0.1]\n3: [0.15, -0.2, 0.40]\n")
+            while True:
+                with self.condition_idle:
+                    while self.robot_status != protocol.RobotMode.ROBOT_MODE_IDLE:  # Wait for Idle
+                        self.condition_idle.wait()
+
+                    print("\n###\tROBOT REACHED TARGET\t###")
+
+                    try:
+                        print("\tQ_ACTUAL:\t",numpy.round(self.jointConfig.q_actual,5))
+                        
+                        user_input = input("Enter target [1,2,3]: ").strip().lower()
+
+                        
+                        res= self.determine_config(int(user_input))
+                        if res is not None:
+                            print("\tQ_TARGET:\t",numpy.round(res.q,5))
+                            self.send_target_config()
+                    except Exception as e:
+                        print(f"Error: {e}")
+                        
+                    while self.robot_status == protocol.RobotMode.ROBOT_MODE_IDLE:
+                        self.condition_idle.wait()
+                        
+
             
 if __name__ == "__main__":
     poseController_service = PoseControllerService()
     poseController_service.setup()
     poseController_service.start()
-    poseController_service.cont_movement()
+    # poseController_service.cont_movement() # Automatic moving from [1 -> 2 -> 3 -> 1...]
+    poseController_service.single_movement() # Manual moving based on input
     
    

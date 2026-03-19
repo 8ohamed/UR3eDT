@@ -94,28 +94,3 @@ class JointConfig:
     def set_q_actual(self,q_actual):
         self.q_actual = q_actual
         
-    def cont_movement(self):
-        # Contineous movement (0 -> 3)
-        preset = 1
-        while True:
-            res = self.generate_configuration(preset)
-            print(res)
-            # Update preset
-            preset += 1
-            if preset > 3:
-                preset = 1
-            time.sleep(5)
-            
-        
-    def operation(self):     
-        while True:
-            print("\n\n*** PRESETS ***\n1: [-0.4, -0.35, 0.1]\n2: [0.4, -0.2, 0.1]\n3: [0.15, -0.2, 0.40]\n")
-            user_input = input("Enter preset: ").strip().lower()
-            
-            if (1 <= int(user_input) and int(user_input) <= 3): 
-                self.generate_configuration(user_input)
-                user_input = ""
-
-if __name__ == "__main__":
-    jointConfig: JointConfig = JointConfig()
-    jointConfig.cont_movement()
