@@ -114,16 +114,16 @@ class PoseControllerService():
     def cont_movement(self):
         preset = 1
         while True:
+            print("\n____________________________________\n")
+            print("Q_ACTUAL:\t",numpy.round(self.jointConfig.q_actual,5))
             with self.condition_idle:
                 while self.robot_status != protocol.RobotMode.ROBOT_MODE_IDLE:  # Wait for Idle
                     self.condition_idle.wait()
 
                 try:
-                    print("\nROBOT REACHED TARGET")
-                    print("\tQ_ACTUAL:\t",numpy.round(self.jointConfig.q_actual,5))
                     res= self.determine_config(preset)
                     if res is not None:
-                        print("\tQ_TARGET:\t",numpy.round(res.q,5))
+                        print("Q_TARGET:\t",numpy.round(res.q,5))
                         self.send_target_config()
                 except Exception as e:
                     print(f"Error: {e}")
@@ -139,21 +139,18 @@ class PoseControllerService():
         while True:
             print("\n\n*** PRESETS ***\n1: [-0.4, -0.35, 0.1]\n2: [0.4, -0.2, 0.1]\n3: [0.15, -0.2, 0.40]\n")
             while True:
+                print("\n____________________________________\n")
+                print("Q_ACTUAL:\t",numpy.round(self.jointConfig.q_actual,5))
+                user_input = input("Enter target [1,2,3]: ").strip().lower()
+                
                 with self.condition_idle:
                     while self.robot_status != protocol.RobotMode.ROBOT_MODE_IDLE:  # Wait for Idle
                         self.condition_idle.wait()
-
-                    print("\n###\tROBOT REACHED TARGET\t###")
-
                     try:
-                        print("\tQ_ACTUAL:\t",numpy.round(self.jointConfig.q_actual,5))
-                        
-                        user_input = input("Enter target [1,2,3]: ").strip().lower()
-
-                        
+                        # print("Q_ACTUAL:\t",numpy.round(self.jointConfig.q_actual,5))                       
                         res= self.determine_config(int(user_input))
                         if res is not None:
-                            print("\tQ_TARGET:\t",numpy.round(res.q,5))
+                            print("Q_TARGET:\t",numpy.round(res.q,5))
                             self.send_target_config()
                     except Exception as e:
                         print(f"Error: {e}")
@@ -167,7 +164,13 @@ if __name__ == "__main__":
     poseController_service = PoseControllerService()
     poseController_service.setup()
     poseController_service.start()
-    # poseController_service.cont_movement() # Automatic moving from [1 -> 2 -> 3 -> 1...]
-    poseController_service.single_movement() # Manual moving based on input
+    while True:
+        res = input("Run auto [y], Single [n]")
+        match res:
+            case "y":
+                poseController_service.cont_movement() # Automatic moving from [1 -> 2 -> 3 -> 1...]
+            case "n":
+                poseController_service.single_movement() # Manual moving based on input
+                
     
    
