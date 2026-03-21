@@ -1,5 +1,5 @@
-""" This modul is for sending control msg to the robot with the target and constrains, 
-then subscribes to the state topic to log the data and save it to a file when the scenario is done. 
+""" This modul is for sending control msg to the robot with the target and constrains,
+then subscribes to the state topic to log the data and save it to a file when the scenario is done.
 """
 
 import numpy as np
@@ -60,7 +60,14 @@ def main():
 
     # Construct control message for loading a program
     #target = [0.06, 0.05, 0.04, 0.03, 0.02, 0.01]
-    target = [np.pi/2, np.pi/2, -np.pi/2, np.pi/2, -np.pi/2, np.pi/2]
+    target = [0.001, 0.001, 0.001, 0.001, 0.001, 0.001]
+
+    #target = [0.174532925 , 0.174532925 , 0.174532925 , 0.174532925 , 0.174532925 , 0.174532925 ] # 10 deg in radians
+    #target = [0.523598775 , 0.523598775 , 0.523598775 , 0.523598775 , 0.523598775 , 0.523598775 ] # 30 deg in radians
+    #target = [0.7853981634 , 0.7853981634 , 0.7853981634 , 0.7853981634 , 0.7853981634 , 0.7853981634] # 45 deg in radians
+    #target = [np.pi/3, np.pi/3, np.pi/3, np.pi/3, np.pi/3, np.pi/3] # 60 deg in radians
+    #target = [5*np.pi/12, 5*np.pi/12, 5*np.pi/12, 5*np.pi/12, 5*np.pi/12, 5*np.pi/12] # 75 deg in radians
+    target = [np.pi/2, np.pi/2, np.pi/2, np.pi/2, np.pi/2, np.pi/2] # 90 deg in radians
 
     vel = 60 # deg/s
     acc = 80 # deg/s^2
@@ -87,19 +94,10 @@ def main():
     rmq.start_consuming()
 
 
-    logger.save_data_to_file("from_0_to_90.csv", "./data")
+    logger.save_data_to_file("90_deg.csv", "./data")
     rmq.close()
 
 
 if __name__ == "__main__":
     main()
-
-
-
-
-
-
-
-
-
 

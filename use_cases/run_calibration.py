@@ -1,34 +1,44 @@
 
 from calibration.utils import load_scenario_csv, save_parameters, load_parameters
 from calibration.optimize import calibrate
+import os
 
 if __name__ == "__main__":
 
+    scenario_paths = [
+        "data/10_deg.csv",
+        "data/30_deg.csv",
+        "data/45_deg.csv",
+        "data/60_deg.csv",
+        "data/75_deg.csv",
+        "data/90_deg.csv",
 
-    scenario_path = "data/from_0_to_90.csv"
+    ]
     output_path = "models/parameters.json"
 
-    scenario = load_scenario_csv(scenario_path)
-    print(f"  samples : {len(scenario['timestamps'])}")
-    print("\nRunning calibration...")
-    result = calibrate(scenario)
+    scenarios = []
+    for path in scenario_paths:
+        s = load_scenario_csv(path)
+        print(f"  {path}: {len(s['timestamps'])} samples")
+        scenarios.append(s)
 
+    print("\nRunning calibration...")
+
+    # Warm-start from existing parameters if available
     initial_vel_scale = None
     initial_acc_scale = None
-    initial_t_delay = 0.0
-    prev = load_parameters(output_path)
-    if prev.get("t_delay") != 0.0:
+    initial_smooth_tau = None
+    if os.path.exists(output_path):
+        prev = load_parameters(output_path)
         initial_vel_scale = prev.get("vel_scale")
         initial_acc_scale = prev.get("acc_scale")
-        initial_t_delay = prev.get("t_delay", 0.0)
+        initial_smooth_tau = prev.get("smooth_tau")
         print(f"  warm-starting from existing: {output_path}")
-    else:
-        print("  existing params have no t_delay, using physics-informed initial guess")
 
-    result = calibrate(scenario,
+    result = calibrate(scenarios,
         initial_vel_scale=initial_vel_scale,
         initial_acc_scale=initial_acc_scale,
-        initial_t_delay=initial_t_delay,
+        initial_smooth_tau=initial_smooth_tau,
     )
 
 

@@ -5,7 +5,7 @@ from scipy.interpolate import interp1d
 
 from calibration.utils import load_scenario_csv, load_parameters
 
-def plot_calibration_results(scenario, vel_scale, acc_scale, sim_dt=0.002):
+def plot_all(scenario, vel_scale, acc_scale, smooth_tau=0.0, sim_dt=0.002):
     """Plot observed vs. model-predicted joint positions.
     Args:
         scenario: dict with keys q0, q_target, max_velocity_deg, acceleration_deg,
@@ -29,6 +29,7 @@ def plot_calibration_results(scenario, vel_scale, acc_scale, sim_dt=0.002):
         t_end=t_obs[-1] + sim_dt,
         vel_scale=vel_scale,
         acc_scale=acc_scale,
+        smooth_tau=smooth_tau,
     )
 
     n_joints = q_obs.shape[1]
@@ -50,8 +51,8 @@ def plot_calibration_results(scenario, vel_scale, acc_scale, sim_dt=0.002):
     plt.show()
     return fig
 
-def plot_model_vs_observed(scenario, vel_scale, acc_scale,
-                           joint_idx=0, sim_dt=0.002):
+def plot_joint_1(scenario, vel_scale, acc_scale,
+                           joint_idx=0, smooth_tau=0.0, sim_dt=0.002):
     """Plot real observed PT data, model prediction, and tracking error for
     one joint.
 
@@ -79,6 +80,7 @@ def plot_model_vs_observed(scenario, vel_scale, acc_scale,
         t_end=t_obs[-1] + sim_dt,
         vel_scale=vel_scale,
         acc_scale=acc_scale,
+        smooth_tau=smooth_tau,
     )
 
     # Interpolate model onto observed timestamps for pointwise error
@@ -109,11 +111,21 @@ def plot_model_vs_observed(scenario, vel_scale, acc_scale,
 
 
 def main():
-    scenario = load_scenario_csv("./data/from_0_to_90.csv")
+    scenario = load_scenario_csv("./data/10_deg.csv") # Peak tracking error (deg): 0.75
+    scenario = load_scenario_csv("./data/30_deg.csv") # Peak tracking error (deg): 1.40
+    scenario = load_scenario_csv("./data/45_deg.csv") # Peak tracking error (deg): 1.49
+    scenario = load_scenario_csv("./data/60_deg.csv") # Peak tracking error (deg): 0.93
+    scenario = load_scenario_csv("./data/75_deg.csv") # Peak tracking error (deg): 1.37
+    scenario = load_scenario_csv("./data/90_deg.csv") # Peak tracking error (deg): 0.95
+
+
+
+
     parameters = load_parameters("./models/parameters.json")
 
-    plot_model_vs_observed(
-        scenario, parameters["vel_scale"], parameters["acc_scale"]
+    plot_joint_1(
+        scenario, parameters["vel_scale"], parameters["acc_scale"],
+        smooth_tau=parameters.get("smooth_tau", 0.0),
     )
 
 if __name__ == "__main__":
