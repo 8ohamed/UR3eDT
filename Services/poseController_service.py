@@ -1,0 +1,176 @@
+# Pose Controller Service
+#Service will read mockup configuration and use it as a initial configution to enhance the target configuration.
+
+#1. Read $q_{actual}$ from rabbitMQ
+#2. Calculate/Determine $q_{target}$
+#3. Send $q_{target}$ via rabbitMQ to mockup
+
+# PRE
+# 1. start rabbitmq
+# 2. start mockup
+
+# Add the project root to Python's path
+import sys
+from pathlib import Path
+project_root = str(Path(__file__).parent.parent)
+if project_root not in sys.path:
+    sys.path.append(project_root)
+
+from typing import Any
+from threading import Condition
+import numpy
+from communication.rabbitmq import Rabbitmq
+from communication import protocol
+from models.JointConfig import JointConfig
+import threading
+
+class PoseControllerService():
+    """
+    loop:
+        Read q_actual from rabbitMQ when robot is idle
+        Determine q_target with presets
+        Send q_target
+    
+    """
+    
+    def __init__(self):
+        # Robot values
+        self.robot_state = None 
+        self.robot_status = None
+        self.q_target = None
+        self.jointConfig= JointConfig()
+        self.rmq = Rabbitmq(ip="localhost",port=5672,username="ur3e",password="ur3e",vhost="/",exchange="UR3E_AMQP",type="topic")
+        self.condition_idle: Condition = threading.Condition()
+    
+    def setup(self):
+        try:
+            self.rmq.connect_to_server()
+            print("Connected to RabbitMQ")
+        except Exception as e:
+            print(f"Failed to connect [{e}]")
+            
+        self.rmq.subscribe(routing_key=protocol.ROUTING_KEY_STATE, on_message_callback=self.update_robot_state)
+                   
+    def update_robot_state(self, ch, method, properties, body):
+        with self.condition_idle:
+            self.robot_state = body
+            # print("\n\n", body)
+
+            if protocol.RobotArmStateKeys.ROBOT_MODE in body:
+                self.robot_status: Any = body[protocol.RobotArmStateKeys.ROBOT_MODE]
+                self.condition_idle.notify_all()  # Notify all waiting threads
+
+            if protocol.RobotArmStateKeys.Q_ACTUAL in body:
+                self.jointConfig.set_q_actual(q_actual=body[protocol.RobotArmStateKeys.Q_ACTUAL])    
+                        
+    def start(self):
+        def run_consumer():
+            try:
+                self.rmq.start_consuming()
+            except Exception as e:
+                print(f"Could not consume [{e}]")
+        
+        consumer_thread = threading.Thread(target=run_consumer, daemon=True)
+        consumer_thread.start()
+        
+        
+    def determine_config(self, preset):
+        if self.robot_state is not None:
+            self.q_target = self.jointConfig.generate_configuration(preset)
+            
+            return self.q_target
+        
+    def send_target_config(self):
+        if self.q_target is None:
+            print("error?")
+        else:    
+            msg= {
+                protocol.CtrlMsgKeys.TYPE: protocol.CtrlMsgFields.LOAD_PROGRAM,
+                protocol.CtrlMsgKeys.JOINT_POSITIONS: self.q_target.q.tolist(),
+                protocol.CtrlMsgKeys.MAX_VELOCITY: 60,
+                protocol.CtrlMsgKeys.ACCELERATION: 60,
+            }
+            
+            self.send_control_message(msg)
+            
+            msg_start = {
+                protocol.CtrlMsgKeys.TYPE: protocol.CtrlMsgFields.PLAY,
+            }
+
+            self.send_control_message(msg=msg_start)
+        
+
+    def send_control_message(self, msg):
+        """Send a control message to the UR3e Mockup via RabbitMQ."""
+        try:
+            self.rmq.send_message(
+                routing_key=protocol.ROUTING_KEY_CTRL,
+                message=msg
+            )
+            print(f"✓ Control message: {msg} sent successfully")
+        except Exception as e:
+            print(f"✗ Failed to send control message: {e}")
+
+    def cont_movement(self):
+        preset = 1
+        while True:
+            print("\n____________________________________\n")
+            print("Q_ACTUAL:\t",numpy.round(self.jointConfig.q_actual,5))
+            with self.condition_idle:
+                while self.robot_status != protocol.RobotMode.ROBOT_MODE_IDLE:  # Wait for Idle
+                    self.condition_idle.wait()
+
+                try:
+                    res= self.determine_config(preset)
+                    if res is not None:
+                        print("Q_TARGET:\t",numpy.round(res.q,5))
+                        self.send_target_config()
+                except Exception as e:
+                    print(f"Error: {e}")
+                    
+                while self.robot_status == protocol.RobotMode.ROBOT_MODE_IDLE:
+                    self.condition_idle.wait()
+
+            preset += 1
+            if preset > 3:
+                preset = 1
+
+    def single_movement(self):
+        while True:
+            print("\n\n*** PRESETS ***\n1: [-0.4, -0.35, 0.1]\n2: [0.4, -0.2, 0.1]\n3: [0.15, -0.2, 0.40]\n")
+            while True:
+                print("\n____________________________________\n")
+                print("Q_ACTUAL:\t",numpy.round(self.jointConfig.q_actual,5))
+                user_input = input("Enter target [1,2,3]: ").strip().lower()
+                
+                with self.condition_idle:
+                    while self.robot_status != protocol.RobotMode.ROBOT_MODE_IDLE:  # Wait for Idle
+                        self.condition_idle.wait()
+                    try:
+                        # print("Q_ACTUAL:\t",numpy.round(self.jointConfig.q_actual,5))                       
+                        res= self.determine_config(int(user_input))
+                        if res is not None:
+                            print("Q_TARGET:\t",numpy.round(res.q,5))
+                            self.send_target_config()
+                    except Exception as e:
+                        print(f"Error: {e}")
+                        
+                    while self.robot_status == protocol.RobotMode.ROBOT_MODE_IDLE:
+                        self.condition_idle.wait()
+                        
+
+            
+if __name__ == "__main__":
+    poseController_service = PoseControllerService()
+    poseController_service.setup()
+    poseController_service.start()
+    while True:
+        res = input("Run auto [y], Single [n]")
+        match res:
+            case "y":
+                poseController_service.cont_movement() # Automatic moving from [1 -> 2 -> 3 -> 1...]
+            case "n":
+                poseController_service.single_movement() # Manual moving based on input
+                
+    
+   
