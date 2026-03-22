@@ -25,7 +25,7 @@ from communication import protocol
 from models.JointConfig import JointConfig
 import time
 
-class PoseControllerService():
+class JointController():
     """
     loop:
         Read q_actual from rabbitMQ when robot is idle
@@ -111,6 +111,8 @@ class PoseControllerService():
             # print(f"✓ Control message: {msg} sent successfully")
         except Exception as e:
             print(f"✗ Failed to send control message: {e}")
+            self.setup()
+            self.start()
 
     def cont_movement(self):
         preset = 1
@@ -146,24 +148,24 @@ class PoseControllerService():
 
             
 if __name__ == "__main__":
-    poseController_service = PoseControllerService()
-    poseController_service.setup()
-    poseController_service.start()
+    jointController = JointController()
+    jointController.setup()
+    jointController.start()
     print("Enter 0 to read state\n\n")
     while True:
         res = input("Run auto [y], Single [n]")
         match res:
             case "y":
-                poseController_service.cont_movement() # Automatic moving from [1 -> 2 -> 3 -> 1...]
+                jointController.cont_movement() # Automatic moving from [1 -> 2 -> 3 -> 1...]
             case "n":
                 while True:
                     print("\n\n*** PRESETS ***\n1: [-0.4, -0.35, 0.1]\n2: [0.4, -0.2, 0.1]\n3: [0.15, -0.2, 0.40]\n")
                     user_input = input("Enter target [1,2,3]: ").strip().lower()
 
-                    poseController_service.single_movement(int(user_input)) # Manual moving based on input
+                    jointController.single_movement(int(user_input)) # Manual moving based on input
             case "a":
                 while True:
-                    print(numpy.round(poseController_service.jointConfig.q_actual,5))
+                    print(numpy.round(jointController.jointConfig.q_actual,5))
                     time.sleep(1)
                 
     
