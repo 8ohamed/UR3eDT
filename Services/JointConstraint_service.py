@@ -22,10 +22,10 @@ from models.JointConfig import JointConfig
 
 class JointConstraint():
     
-    def __init__(self, jointConfigOBV):
+    def __init__(self, jointConfigOBJ):
         self.robot_config: ArrayLike
         self.is_idle = False
-        self.joint_Config: JointConfig = jointConfigOBV
+        self.joint_Config: JointConfig = jointConfigOBJ
         self.current_config = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
         self.rmq = Rabbitmq(ip="localhost",port=5672,username="ur3e",password="ur3e",vhost="/",exchange="UR3E_AMQP",type="topic")
         self.idle_condition: Condition = Condition()
