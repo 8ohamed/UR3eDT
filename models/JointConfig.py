@@ -1,11 +1,13 @@
+from roboticstoolbox.robot.IK import IKSolution
+
+
+from numpy.typing import ArrayLike
+from typing import List
 from roboticstoolbox.robot.DHLink import RevoluteDH
 from roboticstoolbox.robot.DHRobot import DHRobot
-from typing import Any
 import roboticstoolbox as rtb
 import numpy as np
 from roboticstoolbox.robot import IKSolution
-
-import time
 
 class JointConfig:
     
@@ -19,10 +21,10 @@ class JointConfig:
             rtb.RevoluteDH(d = 0.08535, a = 0,        alpha = -np.pi/2),
             rtb.RevoluteDH(d = 0.0921,  a = 0,        alpha = 0)
         ]
-        self.configuration: IKSolution
-        self.q_actual= [0,0,0,0,0,0]
+        self.q_actual = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
         self.acc = 0
         self.vel = 0
+        self.mask = [1, 1, 1, 1, 1, 1]
         
         # Create the robot object
         self.robot: DHRobot = rtb.DHRobot(self.links, name="UR3e")
@@ -81,16 +83,23 @@ class JointConfig:
         T[:3,3] = [x,y,z]
 
         # Calculate joint configuration
-        configuration = self.robot.ikine_LM(T,q0=self.q_actual)
-                   
-        if configuration.success == True:
-            # Update configuration
-            # print(f"\nConfiguration: \n\tFrom:\t{self.q_actual}\n\tTo:\t{configuration.q}")
-            # self.configuration = configuration
-            return configuration
+        configuration: IKSolution = self.robot.ikine_LM(T,q0=self.q_actual,joint_limits=True,tol=1e-3)
+        return configuration
         
-        # return False???        
+    def set_link_constraint(self,joint: int):
+        range = 0.1
+        self.links[joint].qlim = [self.q_actual[joint]-range, self.q_actual[joint]+range]
+        # print(f"Set link[{joint}] constraint {self.q_actual[joint]*180/np.pi}")
+        self.robot = rtb.DHRobot(self.links) # Update settings
+        # print(self.robot)
+
+    def reset_link_constraint(self,joint: int):
+        self.links[joint].qlim = [-np.pi, np.pi]
+        self.robot = rtb.DHRobot(self.links) # Update settings
     
-    def set_q_actual(self,q_actual):
+    def set_q_actual(self,q_actual: ArrayLike):
         self.q_actual = q_actual
+        # print(f"Updated robot q_acutal: {q_actual}")
+        
+
         
