@@ -81,29 +81,32 @@ class JointConstraint():
                 print(f"Could not consume [{e}]")
                 self.setup()
                 self.start()
+                self.program()
         
         consumer_thread = threading.Thread(target=run_consumer, daemon=True)
         consumer_thread.start()
             
+    def program(self):
+        preset = ""
+        print("Enter 0 to read state\n\n")
+        while True:
+            print("\n____________________________________\n")
+            preset = input("Enter which preset to test [1,2,3]: ")
+            print(f"\n###\tTESTING PRESET {preset}\t###\n")
+            if preset == "0":
+                while True:
+                    print(np.round(self.current_config,5))
+                    time.sleep(1)
+            else:
+                self.test_configuration(preset=int(preset))
+                        
+
 # Connect via rabbitMQ to seperate and run as an independant service
 if __name__ == "__main__":
     jointConfig = JointConfig()
     jointConstraint = JointConstraint(jointConfig)
     jointConstraint.setup()
     jointConstraint.start()
-    joint = ""
-    preset = ""
-    print("Enter 0 to read state\n\n")
-    while True:
-        print("\n____________________________________\n")
-        preset = input("Enter which preset to test [1,2,3]: ")
-        print(f"\n###\tTESTING PRESET {preset}\t###\n")
-        if preset == "0":
-            while True:
-                print(np.round(jointConstraint.current_config,5))
-                time.sleep(1)
-        else:
-            jointConstraint.test_configuration(preset=int(preset))
-                
+    jointConstraint.program()   
 
    
