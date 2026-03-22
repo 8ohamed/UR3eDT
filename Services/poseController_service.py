@@ -17,12 +17,13 @@ if project_root not in sys.path:
     sys.path.append(project_root)
 
 from typing import Any
+import threading
 from threading import Condition
 import numpy
 from communication.rabbitmq import Rabbitmq
 from communication import protocol
 from models.JointConfig import JointConfig
-import threading
+import time
 
 class PoseControllerService():
     """
@@ -107,70 +108,63 @@ class PoseControllerService():
                 routing_key=protocol.ROUTING_KEY_CTRL,
                 message=msg
             )
-            print(f"✓ Control message: {msg} sent successfully")
+            # print(f"✓ Control message: {msg} sent successfully")
         except Exception as e:
             print(f"✗ Failed to send control message: {e}")
 
     def cont_movement(self):
         preset = 1
         while True:
-            print("\n____________________________________\n")
-            print("Q_ACTUAL:\t",numpy.round(self.jointConfig.q_actual,5))
-            with self.condition_idle:
-                while self.robot_status != protocol.RobotMode.ROBOT_MODE_IDLE:  # Wait for Idle
-                    self.condition_idle.wait()
-
-                try:
-                    res= self.determine_config(preset)
-                    if res is not None:
-                        print("Q_TARGET:\t",numpy.round(res.q,5))
-                        self.send_target_config()
-                except Exception as e:
-                    print(f"Error: {e}")
-                    
-                while self.robot_status == protocol.RobotMode.ROBOT_MODE_IDLE:
-                    self.condition_idle.wait()
-
+            self.single_movement(preset)
+            time.sleep(10)
             preset += 1
             if preset > 3:
                 preset = 1
 
-    def single_movement(self):
-        while True:
-            print("\n\n*** PRESETS ***\n1: [-0.4, -0.35, 0.1]\n2: [0.4, -0.2, 0.1]\n3: [0.15, -0.2, 0.40]\n")
-            while True:
-                print("\n____________________________________\n")
-                print("Q_ACTUAL:\t",numpy.round(self.jointConfig.q_actual,5))
-                user_input = input("Enter target [1,2,3]: ").strip().lower()
+    def single_movement(self, preset):
+        print("\n____________________________________\n")
+
+        with self.condition_idle:
+            while self.robot_status != protocol.RobotMode.ROBOT_MODE_IDLE:  # Wait for Idle
+                self.condition_idle.wait()
+            try:
+                # print("Q_ACTUAL:\t",numpy.round(self.jointConfig.q_actual,5))                       
+                res= self.determine_config(preset)
+                if res is not None:
+                    print("🟨 Q_TARGET:\t",numpy.round(res.q,5))
+                    self.send_target_config()
+            except Exception as e:
+                print(f"Error: {e}")
                 
-                with self.condition_idle:
-                    while self.robot_status != protocol.RobotMode.ROBOT_MODE_IDLE:  # Wait for Idle
-                        self.condition_idle.wait()
-                    try:
-                        # print("Q_ACTUAL:\t",numpy.round(self.jointConfig.q_actual,5))                       
-                        res= self.determine_config(int(user_input))
-                        if res is not None:
-                            print("Q_TARGET:\t",numpy.round(res.q,5))
-                            self.send_target_config()
-                    except Exception as e:
-                        print(f"Error: {e}")
-                        
-                    while self.robot_status == protocol.RobotMode.ROBOT_MODE_IDLE:
-                        self.condition_idle.wait()
-                        
+            while self.robot_status == protocol.RobotMode.ROBOT_MODE_IDLE:
+                self.condition_idle.wait()
+                
+            while self.robot_status != protocol.RobotMode.ROBOT_MODE_IDLE:
+                self.condition_idle.wait()
+            
+            print("✅ Q_ACTUAL:\t", numpy.round(self.jointConfig.q_actual, 5))
 
             
 if __name__ == "__main__":
     poseController_service = PoseControllerService()
     poseController_service.setup()
     poseController_service.start()
+    print("Enter 0 to read state\n\n")
     while True:
         res = input("Run auto [y], Single [n]")
         match res:
             case "y":
                 poseController_service.cont_movement() # Automatic moving from [1 -> 2 -> 3 -> 1...]
             case "n":
-                poseController_service.single_movement() # Manual moving based on input
+                while True:
+                    print("\n\n*** PRESETS ***\n1: [-0.4, -0.35, 0.1]\n2: [0.4, -0.2, 0.1]\n3: [0.15, -0.2, 0.40]\n")
+                    user_input = input("Enter target [1,2,3]: ").strip().lower()
+
+                    poseController_service.single_movement(int(user_input)) # Manual moving based on input
+            case "a":
+                while True:
+                    print(numpy.round(poseController_service.jointConfig.q_actual,5))
+                    time.sleep(1)
                 
     
    
