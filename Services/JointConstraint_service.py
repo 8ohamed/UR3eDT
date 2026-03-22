@@ -20,7 +20,7 @@ from communication import protocol
 from communication.rabbitmq import Rabbitmq
 from models.JointConfig import JointConfig
 
-class ConstrainJoint():
+class JointConstraint():
     
     def __init__(self, jointConfigOBV):
         self.robot_config: ArrayLike
@@ -79,6 +79,8 @@ class ConstrainJoint():
                 self.rmq.start_consuming()
             except Exception as e:
                 print(f"Could not consume [{e}]")
+                self.setup()
+                self.start()
         
         consumer_thread = threading.Thread(target=run_consumer, daemon=True)
         consumer_thread.start()
@@ -86,9 +88,9 @@ class ConstrainJoint():
 # Connect via rabbitMQ to seperate and run as an independant service
 if __name__ == "__main__":
     jointConfig = JointConfig()
-    constrainJoint = ConstrainJoint(jointConfig)
-    constrainJoint.setup()
-    constrainJoint.start()
+    jointConstraint = JointConstraint(jointConfig)
+    jointConstraint.setup()
+    jointConstraint.start()
     joint = ""
     preset = ""
     print("Enter 0 to read state\n\n")
@@ -98,10 +100,10 @@ if __name__ == "__main__":
         print(f"\n###\tTESTING PRESET {preset}\t###\n")
         if preset == "0":
             while True:
-                print(np.round(constrainJoint.current_config,5))
+                print(np.round(jointConstraint.current_config,5))
                 time.sleep(1)
         else:
-            constrainJoint.test_configuration(preset=int(preset))
+            jointConstraint.test_configuration(preset=int(preset))
                 
 
    
