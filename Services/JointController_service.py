@@ -70,6 +70,9 @@ class JointController():
                 self.rmq.start_consuming()
             except Exception as e:
                 print(f"Could not consume [{e}]")
+                self.setup()
+                self.start()
+                self.program()
         
         consumer_thread = threading.Thread(target=run_consumer, daemon=True)
         consumer_thread.start()
@@ -113,12 +116,13 @@ class JointController():
             print(f"✗ Failed to send control message: {e}")
             self.setup()
             self.start()
+            self.program()
 
     def cont_movement(self):
         preset = 1
         while True:
             self.single_movement(preset)
-            time.sleep(10)
+            time.sleep(5)
             preset += 1
             if preset > 3:
                 preset = 1
@@ -146,27 +150,31 @@ class JointController():
             
             print("✅ Q_ACTUAL:\t", numpy.round(self.jointConfig.q_actual, 5))
 
+    def program(self):
+        print("Enter 0 to read state\n\n")
+        while True:
+            res = input("Run auto [y], Single [n]")
+            match res:
+                case "y":
+                    jointController.cont_movement() # Automatic moving from [1 -> 2 -> 3 -> 1...]
+                case "n":
+                    while True:
+                        print("\n\n*** PRESETS ***\n1: [-0.4, -0.35, 0.1]\n2: [0.4, -0.2, 0.1]\n3: [0.15, -0.2, 0.40]\n")
+                        user_input = input("Enter target [1,2,3]: ").strip().lower()
+
+                        jointController.single_movement(int(user_input)) # Manual moving based on input
+                case "a":
+                    while True:
+                        print(numpy.round(jointController.jointConfig.q_actual,5))
+                        time.sleep(1)
+        
             
 if __name__ == "__main__":
     jointController = JointController()
     jointController.setup()
     jointController.start()
-    print("Enter 0 to read state\n\n")
-    while True:
-        res = input("Run auto [y], Single [n]")
-        match res:
-            case "y":
-                jointController.cont_movement() # Automatic moving from [1 -> 2 -> 3 -> 1...]
-            case "n":
-                while True:
-                    print("\n\n*** PRESETS ***\n1: [-0.4, -0.35, 0.1]\n2: [0.4, -0.2, 0.1]\n3: [0.15, -0.2, 0.40]\n")
-                    user_input = input("Enter target [1,2,3]: ").strip().lower()
-
-                    jointController.single_movement(int(user_input)) # Manual moving based on input
-            case "a":
-                while True:
-                    print(numpy.round(jointController.jointConfig.q_actual,5))
-                    time.sleep(1)
+    jointController.program()
+    
                 
     
    
