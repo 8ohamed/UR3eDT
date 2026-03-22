@@ -101,5 +101,6 @@ class JointConfig:
         self.q_actual = q_actual
         # print(f"Updated robot q_acutal: {q_actual}")
         
-
+    def get_links(self):
+        return self.links
         
