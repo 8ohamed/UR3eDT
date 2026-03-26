@@ -38,19 +38,19 @@ class JointConfig:
                     y=-0.35
                     z=0.1
                     self.acc = 100
-                    self.vel = 100
+                    self.vel = [100,100,20,20,40,40]
                 case 2:
                     x = 0.4
                     y=-0.2
                     z=0.1
                     self.acc = 80
-                    self.vel = 80
+                    self.vel = [100,100,20,20,40,40]
                 case 3:
                     x=0.15
                     y=-0.2
                     z=0.40
-                    self.acc = 70
-                    self.vel = 40
+                    self.acc = 40
+                    self.vel = [80,90,60,10,20,40]
                 case _:
                     print("Preset not available")
                     return None
@@ -83,7 +83,8 @@ class JointConfig:
         T[:3,3] = [x,y,z]
 
         # Calculate joint configuration
-        configuration: IKSolution = self.robot.ikine_LM(T,q0=self.q_actual,joint_limits=True,tol=1e-3)
+        # configuration: IKSolution = self.robot.ikine_LM(T,q0=self.q_actual,joint_limits=True,tol=1e-3)
+        configuration: IKSolution = self.robot.ikine_LM(T,q0=self.q_actual,joint_limits=True)
         return configuration
         
     def set_link_constraint(self,joint: int):

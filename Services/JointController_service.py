@@ -40,17 +40,11 @@ class JointController():
         self.robot_status = None
         self.q_target = None
         self.jointConfig= JointConfig()
-        self.rmq = Rabbitmq(ip="localhost",port=5672,username="ur3e",password="ur3e",vhost="/",exchange="UR3E_AMQP",type="topic")
+        # self.rmq = Rabbitmq(ip="localhost",port=5672,username="ur3e",password="ur3e",vhost="/",exchange="UR3E_AMQP",type="topic")
         self.condition_idle: Condition = threading.Condition()
+        self.rmq_producer = Rabbitmq(ip="localhost",port=5672,username="ur3e",password="ur3e",vhost="/",exchange="UR3E_AMQP",type="topic")
+        self.setup_complete = False
     
-    def setup(self):
-        try:
-            self.rmq.connect_to_server()
-            print("Connected to RabbitMQ")
-        except Exception as e:
-            print(f"Failed to connect [{e}]")
-            
-        self.rmq.subscribe(routing_key=protocol.ROUTING_KEY_STATE, on_message_callback=self.update_robot_state)
                    
     def update_robot_state(self, ch, method, properties, body):
         with self.condition_idle:
@@ -62,20 +56,50 @@ class JointController():
                 self.condition_idle.notify_all()  # Notify all waiting threads
 
             if protocol.RobotArmStateKeys.Q_ACTUAL in body:
-                self.jointConfig.set_q_actual(q_actual=body[protocol.RobotArmStateKeys.Q_ACTUAL])    
-                        
-    def start(self):
-        def run_consumer():
-            try:
-                self.rmq.start_consuming()
-            except Exception as e:
-                print(f"Could not consume [{e}]")
-                self.setup()
-                self.start()
-                self.program()
+                self.jointConfig.set_q_actual(q_actual=body[protocol.RobotArmStateKeys.Q_ACTUAL])   
+     
+    def consumer_thread(self):
+        rmq = Rabbitmq(ip="localhost",port=5672,username="ur3e",password="ur3e",vhost="/",exchange="UR3E_AMQP",type="topic")
+        # self.rmq_producer = rmq
+        try:
+            rmq.connect_to_server()
+            print("Consumer\tConnected to RabbitMQ")
+        except Exception as e:
+            print(f"Failed to connect [{e}]")
+            
+        rmq.subscribe(routing_key=protocol.ROUTING_KEY_STATE, on_message_callback=self.update_robot_state)
         
-        consumer_thread = threading.Thread(target=run_consumer, daemon=True)
-        consumer_thread.start()
+        self.setup_complete = True
+        try:
+            rmq.start_consuming()
+            print("Start consuming")
+
+        except Exception as e:
+            print(f"Could not consume [{e}]")
+            # self.program()
+            
+                     
+    def setup(self):
+        try:
+            self.rmq_producer.connect_to_server()
+            print("Producer\tConnected to RabbitMQ")
+        except Exception as e:
+            print(f"Failed to connect [{e}]")
+            
+        # self.rmq_.subscribe(routing_key=protocol.ROUTING_KEY_STATE, on_message_callback=self.update_robot_state)
+                        
+    # def start(self):
+    #     def run_consumer():
+    #         try:
+    #             self.rmq.start_consuming()
+    #         except Exception as e:
+    #             print(f"Could not consume [{e}]")
+    #             self.setup()
+    #             self.start()
+    #             self.program()
+        
+    #     consumer_thread = threading.Thread(target=run_consumer, daemon=True)
+    #     consumer_thread.start()
         
         
     def determine_config(self, preset):
@@ -91,8 +115,8 @@ class JointController():
             msg= {
                 protocol.CtrlMsgKeys.TYPE: protocol.CtrlMsgFields.LOAD_PROGRAM,
                 protocol.CtrlMsgKeys.JOINT_POSITIONS: self.q_target.q.tolist(),
-                protocol.CtrlMsgKeys.MAX_VELOCITY: 60,
-                protocol.CtrlMsgKeys.ACCELERATION: 60,
+                # protocol.CtrlMsgKeys.MAX_VELOCITY: 60,
+                # protocol.CtrlMsgKeys.ACCELERATION: 60,
             }
             
             self.send_control_message(msg)
@@ -107,7 +131,7 @@ class JointController():
     def send_control_message(self, msg):
         """Send a control message to the UR3e Mockup via RabbitMQ."""
         try:
-            self.rmq.send_message(
+            self.rmq_producer.send_message(
                 routing_key=protocol.ROUTING_KEY_CTRL,
                 message=msg
             )
@@ -115,7 +139,6 @@ class JointController():
         except Exception as e:
             print(f"✗ Failed to send control message: {e}")
             self.setup()
-            self.start()
             self.program()
 
     def cont_movement(self):
@@ -151,19 +174,21 @@ class JointController():
             print("✅ Q_ACTUAL:\t", numpy.round(self.jointConfig.q_actual, 5))
 
     def program(self):
-        print("Enter 0 to read state\n\n")
+        print("\n____________________________________\n")
+
+        print("Enter [r] to read state\n")
         while True:
-            res = input("Run auto [y], Single [n]")
+            res = input("Run auto [a], Single [s]: ")
             match res:
-                case "y":
+                case "a":
                     jointController.cont_movement() # Automatic moving from [1 -> 2 -> 3 -> 1...]
-                case "n":
+                case "s":
                     while True:
                         print("\n\n*** PRESETS ***\n1: [-0.4, -0.35, 0.1]\n2: [0.4, -0.2, 0.1]\n3: [0.15, -0.2, 0.40]\n")
                         user_input = input("Enter target [1,2,3]: ").strip().lower()
 
                         jointController.single_movement(int(user_input)) # Manual moving based on input
-                case "a":
+                case "r":
                     while True:
                         print(numpy.round(jointController.jointConfig.q_actual,5))
                         time.sleep(1)
@@ -172,7 +197,14 @@ class JointController():
 if __name__ == "__main__":
     jointController = JointController()
     jointController.setup()
-    jointController.start()
+    # jointController.start()
+        # Start consuming data
+    consumer_thread = threading.Thread(target=jointController.consumer_thread, daemon=True)
+    consumer_thread.start()
+    
+    while jointController.setup_complete == False:
+        time.sleep(1)
+    
     jointController.program()
     
                 

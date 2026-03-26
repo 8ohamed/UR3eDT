@@ -27,8 +27,11 @@ class JointConstraint():
         self.is_idle = False
         self.joint_Config: JointConfig = jointConfigOBJ
         self.current_config = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-        self.rmq = Rabbitmq(ip="localhost",port=5672,username="ur3e",password="ur3e",vhost="/",exchange="UR3E_AMQP",type="topic")
+        # self.rmq = Rabbitmq(ip="localhost",port=5672,username="ur3e",password="ur3e",vhost="/",exchange="UR3E_AMQP",type="topic")
         self.idle_condition: Condition = Condition()
+        self.setup_complete = False
+
+
 
     def test_configuration(self,preset):
         """
@@ -64,28 +67,49 @@ class JointConstraint():
                     self.is_idle = True
                     self.idle_condition.notify_all()
                     
-    def setup(self):
+    # def setup(self):
+    #     try:
+    #         self.rmq.connect_to_server()
+    #         print("Connected to RabbitMQ")
+    #     except Exception as e:
+    #         print(f"Failed to connect [{e}]")
+            
+    #     self.rmq.subscribe(routing_key=protocol.ROUTING_KEY_STATE, on_message_callback=self.update_robot_state)
+    
+    # def start(self):
+    #     def run_consumer():
+    #         try:
+    #             self.rmq.start_consuming()
+    #         except Exception as e:
+    #             print(f"Could not consume [{e}]")
+    #             self.setup()
+    #             self.start()
+    #             self.program()
+        
+        # consumer_thread = threading.Thread(target=self.consumer_thread(), daemon=True)
+        # consumer_thread.start()
+        
+    def consumer_thread(self):
+        rmq = Rabbitmq(ip="localhost",port=5672,username="ur3e",password="ur3e",vhost="/",exchange="UR3E_AMQP",type="topic")
+        # self.rmq_producer = rmq
         try:
-            self.rmq.connect_to_server()
-            print("Connected to RabbitMQ")
+            rmq.connect_to_server()
+            print("Consumer\tConnected to RabbitMQ")
         except Exception as e:
             print(f"Failed to connect [{e}]")
             
-        self.rmq.subscribe(routing_key=protocol.ROUTING_KEY_STATE, on_message_callback=self.update_robot_state)
-    
-    def start(self):
-        def run_consumer():
-            try:
-                self.rmq.start_consuming()
-            except Exception as e:
-                print(f"Could not consume [{e}]")
-                self.setup()
-                self.start()
-                self.program()
+        rmq.subscribe(routing_key=protocol.ROUTING_KEY_STATE, on_message_callback=self.update_robot_state)
         
-        consumer_thread = threading.Thread(target=run_consumer, daemon=True)
-        consumer_thread.start()
-            
+        self.setup_complete = True
+        
+        try:
+            rmq.start_consuming()
+            print("Start consuming")
+
+        except Exception as e:
+            print(f"Could not consume [{e}]")
+            # self.program()
+                    
     def program(self):
         preset = ""
         print("Enter 0 to read state\n\n")
@@ -105,8 +129,16 @@ class JointConstraint():
 if __name__ == "__main__":
     jointConfig = JointConfig()
     jointConstraint = JointConstraint(jointConfig)
-    jointConstraint.setup()
-    jointConstraint.start()
+    # jointConstraint.setup()
+    # jointConstraint.start()
+    
+    # Start consuming data
+    consumer_thread = threading.Thread(target=jointConstraint.consumer_thread, daemon=True)
+    consumer_thread.start()
+    
+    while jointConstraint.setup_complete == False:
+        time.sleep(1)
+    
     jointConstraint.program()   
 
    
