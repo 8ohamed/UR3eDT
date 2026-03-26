@@ -57,11 +57,11 @@ def load_scenario_csv(filepath):
 
 
 def save_parameters(filepath, calibration_result):
-    """Save calibrated vel_scale, acc_scale, and optionally t_delay to a JSON file."""
+    """Save calibrated vel_scale and acc_scale to a JSON file."""
     data = {
         "vel_scale": calibration_result["vel_scale"],
         "acc_scale": calibration_result["acc_scale"],
-        "t_delay": calibration_result.get("t_delay", 0.0),
+        "smooth_tau": calibration_result.get("smooth_tau", 0.0),
     }
     os.makedirs(os.path.dirname(filepath) or ".", exist_ok=True)
     with open(filepath, "w") as f:

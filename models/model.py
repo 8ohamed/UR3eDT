@@ -52,7 +52,8 @@ class MotionModel:
         dt,
         t_end,
         vel_scale,
-        acc_scale
+        acc_scale,
+        smooth_tau=0.0,
     ):
         n = len(q0)
         if len(vel_scale) != n:
@@ -117,4 +118,10 @@ class MotionModel:
             q_log[i] = q.copy()
             qd_log[i] = qd.copy()
             qdd_log[i] = (qd - qd_prev) / dt
+
+        if smooth_tau > 1e-6:
+            alpha = dt / (dt + smooth_tau)
+            for k in range(1, len(q_log)):
+                q_log[k] = q_log[k-1] + alpha * (q_log[k] - q_log[k-1])
+
         return t, q_log, qd_log, qdd_log
