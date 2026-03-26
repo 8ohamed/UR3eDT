@@ -28,39 +28,35 @@ class Visualization():
         while True:
             self.robot.q = self.robot_q_actual
             backend.step()
-            # self.robot.plot(self.robot_q_actual,backend="pyplot")            
-            # time.sleep(0.1)
 
     def update_robot_state(self,ch, method, properties, body):
         if protocol.RobotArmStateKeys.Q_ACTUAL in body:
             self.robot_q_actual = body[protocol.RobotArmStateKeys.Q_ACTUAL]
-            
-    def setup(self):
+      
+    def consumer_thread(self):
+        rmq = Rabbitmq(ip="localhost",port=5672,username="ur3e",password="ur3e",vhost="/",exchange="UR3E_AMQP",type="topic")
         try:
-            self.rmq.connect_to_server()
-            print("Connected to RabbitMQ")
+            rmq.connect_to_server()
+            print("Consumer\tConnected to RabbitMQ")
         except Exception as e:
             print(f"Failed to connect [{e}]")
             
-        self.rmq.subscribe(routing_key=protocol.ROUTING_KEY_STATE, on_message_callback=self.update_robot_state)
-    
-    def start(self):
-        def run_consumer():
-            try:
-                self.rmq.start_consuming()
-            except Exception as e:
-                print(f"Could not consume [{e}]")
-                self.setup()
-                self.start()
+        rmq.subscribe(routing_key=protocol.ROUTING_KEY_STATE, on_message_callback=self.update_robot_state)
         
-        consumer_thread = threading.Thread(target=run_consumer, daemon=True)
-        consumer_thread.start()    
+        try:
+            rmq.start_consuming()
+            print("Start consuming")
+
+        except Exception as e:
+            print(f"Could not consume [{e}]")
             
+
 if __name__ == "__main__":
     jointConfig = JointConfig()
     visualization = Visualization(jointConfigOBJ=jointConfig)
-    visualization.setup()
-    visualization.start()
+    
+    consumer_thread = threading.Thread(target=visualization.consumer_thread, daemon=True)
+    consumer_thread.start()
     
     test= input("WAITING FOR ENTER")
     while True:
