@@ -1,0 +1,14 @@
+apiVersion: 1
+datasources:
+  - name: InfluxDB-UR3e
+    type: influxdb
+    uid: influxdb-ur3e
+    url: http://influxdb-ur3e:8086
+    access: proxy
+    isDefault: true
+    jsonData:
+      version: Flux
+      organization: ur3e_dt
+      defaultBucket: ur3e
+    secureJsonData:
+      token: ur3e-dt-token
