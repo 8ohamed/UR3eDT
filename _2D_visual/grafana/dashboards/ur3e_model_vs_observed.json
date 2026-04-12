@@ -30,7 +30,8 @@
               {"id": "color", "value": {"fixedColor": "#F2495C", "mode": "fixed"}},
               {"id": "custom.drawStyle", "value": "line"},
               {"id": "custom.lineWidth", "value": 2},
-              {"id": "custom.showPoints", "value": "never"}
+              {"id": "custom.showPoints", "value": "never"},
+              {"id": "custom.spanNulls", "value": 200}
             ]
           }
         ]
@@ -49,7 +50,7 @@
         },
         {
           "datasource": {"type": "influxdb", "uid": "influxdb-ur3e"},
-          "query": "from(bucket: \"ur3e\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"model_prediction\" and r._field == \"q_j0\")",
+          "query": "from(bucket: \"ur3e\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"model_prediction\" and r._field == \"q_j0\")\n  |> drop(columns: [\"motion_id\"])",
           "refId": "B"
         }
       ],
@@ -81,7 +82,8 @@
               {"id": "color", "value": {"fixedColor": "#F2495C", "mode": "fixed"}},
               {"id": "custom.drawStyle", "value": "line"},
               {"id": "custom.lineWidth", "value": 2},
-              {"id": "custom.showPoints", "value": "never"}
+              {"id": "custom.showPoints", "value": "never"},
+              {"id": "custom.spanNulls", "value": 200}
             ]
           }
         ]
@@ -100,7 +102,7 @@
         },
         {
           "datasource": {"type": "influxdb", "uid": "influxdb-ur3e"},
-          "query": "from(bucket: \"ur3e\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"model_prediction\" and r._field == \"q_j1\")",
+          "query": "from(bucket: \"ur3e\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"model_prediction\" and r._field == \"q_j1\")\n  |> drop(columns: [\"motion_id\"])",
           "refId": "B"
         }
       ],
@@ -132,7 +134,8 @@
               {"id": "color", "value": {"fixedColor": "#F2495C", "mode": "fixed"}},
               {"id": "custom.drawStyle", "value": "line"},
               {"id": "custom.lineWidth", "value": 2},
-              {"id": "custom.showPoints", "value": "never"}
+              {"id": "custom.showPoints", "value": "never"},
+              {"id": "custom.spanNulls", "value": 200}
             ]
           }
         ]
@@ -151,7 +154,7 @@
         },
         {
           "datasource": {"type": "influxdb", "uid": "influxdb-ur3e"},
-          "query": "from(bucket: \"ur3e\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"model_prediction\" and r._field == \"q_j2\")",
+          "query": "from(bucket: \"ur3e\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"model_prediction\" and r._field == \"q_j2\")\n  |> drop(columns: [\"motion_id\"])",
           "refId": "B"
         }
       ],
@@ -183,7 +186,8 @@
               {"id": "color", "value": {"fixedColor": "#F2495C", "mode": "fixed"}},
               {"id": "custom.drawStyle", "value": "line"},
               {"id": "custom.lineWidth", "value": 2},
-              {"id": "custom.showPoints", "value": "never"}
+              {"id": "custom.showPoints", "value": "never"},
+              {"id": "custom.spanNulls", "value": 200}
             ]
           }
         ]
@@ -202,7 +206,7 @@
         },
         {
           "datasource": {"type": "influxdb", "uid": "influxdb-ur3e"},
-          "query": "from(bucket: \"ur3e\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"model_prediction\" and r._field == \"q_j3\")",
+          "query": "from(bucket: \"ur3e\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"model_prediction\" and r._field == \"q_j3\")\n  |> drop(columns: [\"motion_id\"])",
           "refId": "B"
         }
       ],
@@ -234,7 +238,8 @@
               {"id": "color", "value": {"fixedColor": "#F2495C", "mode": "fixed"}},
               {"id": "custom.drawStyle", "value": "line"},
               {"id": "custom.lineWidth", "value": 2},
-              {"id": "custom.showPoints", "value": "never"}
+              {"id": "custom.showPoints", "value": "never"},
+              {"id": "custom.spanNulls", "value": 200}
             ]
           }
         ]
@@ -253,7 +258,7 @@
         },
         {
           "datasource": {"type": "influxdb", "uid": "influxdb-ur3e"},
-          "query": "from(bucket: \"ur3e\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"model_prediction\" and r._field == \"q_j4\")",
+          "query": "from(bucket: \"ur3e\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"model_prediction\" and r._field == \"q_j4\")\n  |> drop(columns: [\"motion_id\"])",
           "refId": "B"
         }
       ],
@@ -285,7 +290,8 @@
               {"id": "color", "value": {"fixedColor": "#F2495C", "mode": "fixed"}},
               {"id": "custom.drawStyle", "value": "line"},
               {"id": "custom.lineWidth", "value": 2},
-              {"id": "custom.showPoints", "value": "never"}
+              {"id": "custom.showPoints", "value": "never"},
+              {"id": "custom.spanNulls", "value": 200}
             ]
           }
         ]
@@ -304,7 +310,7 @@
         },
         {
           "datasource": {"type": "influxdb", "uid": "influxdb-ur3e"},
-          "query": "from(bucket: \"ur3e\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"model_prediction\" and r._field == \"q_j5\")",
+          "query": "from(bucket: \"ur3e\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"model_prediction\" and r._field == \"q_j5\")\n  |> drop(columns: [\"motion_id\"])",
           "refId": "B"
         }
       ],
@@ -321,5 +327,5 @@
   "timezone": "browser",
   "title": "UR3e Model vs Observed",
   "uid": "ur3e-model-vs-observed",
-  "version": 1
+  "version": 3
 }

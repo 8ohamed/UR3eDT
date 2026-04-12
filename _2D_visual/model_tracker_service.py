@@ -70,6 +70,7 @@ class ModelTrackerService:
 
         # ── per-motion state (reset between motions) ──────────────────────
         self._motion_active = False
+        self._motion_counter = 0      # incremented each new motion → unique series tag
         self._t_start = None          # robot TIMESTAMP of the first Running msg
         self._ts_offset_ns = None     # calibrated once: wall_ns - robot_ns
         self._prev_mode = None        # previous robot mode string
@@ -168,6 +169,7 @@ class ModelTrackerService:
         # 1) Detect motion start  (Idle → Running)
         if not self._motion_active and robot_mode == RobotMode.ROBOT_MODE_RUNNING:
             self._motion_active = True
+            self._motion_counter += 1
             self._t_start = timestamp
 
             # If LOAD_PROGRAM arrived before we had an idle state, the model
@@ -190,7 +192,7 @@ class ModelTrackerService:
         if self._motion_active and self._q_interp is not None:
             elapsed = timestamp - self._t_start
             wall_ts = self._ts_offset_ns + int(timestamp * 1e9)
-            self._write_prediction(elapsed, q_actual, wall_ts)
+            self._write_prediction(elapsed, q_actual, wall_ts, self._motion_counter)
 
         # 3) Detect motion end  (Running → Idle)
         if (self._motion_active
@@ -259,7 +261,7 @@ class ModelTrackerService:
 
     # ── writing predictions ───────────────────────────────────────────────
 
-    def _write_prediction(self, elapsed, q_actual, wall_ts):
+    def _write_prediction(self, elapsed, q_actual, wall_ts, motion_id):
         """Interpolate the model at *elapsed* seconds, write prediction + error."""
         elapsed = max(0.0, elapsed)
 
@@ -276,16 +278,17 @@ class ModelTrackerService:
 
             error_fields[f"err_j{j}"] = np.rad2deg(q_pred - q_actual[j])
 
+        tags = {"source": "model", "motion_id": str(motion_id)}
         self._influx.write_point(
             measurement=MEASUREMENT_MODEL,
             fields=model_fields,
-            tags={"source": "model"},
+            tags=tags,
             timestamp_ns=wall_ts,
         )
         self._influx.write_point(
             measurement=MEASUREMENT_ERROR,
             fields=error_fields,
-            tags={"source": "model"},
+            tags=tags,
             timestamp_ns=wall_ts,
         )
 

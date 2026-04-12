@@ -85,9 +85,6 @@ def main():
     )
     _start_service_thread(tracker, "ModelTracker")
 
-    # ── 3. block until interrupted ────────────────────────────────────────
-    log.info("DT Manager running — waiting for motions from the PT …")
-    log.info("Send commands with:  python mini_controller.py --target 30 45 -30 10 20 -60")
     try:
         while True:
             time.sleep(1)
