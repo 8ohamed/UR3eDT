@@ -1,11 +1,12 @@
 """Service that runs the calibrated motion model and writes predictions to InfluxDB.
 
 Workflow per motion (Idle → Running → Idle):
-    1. On the first "Running" state message, run the full model prediction.
-    2. For every subsequent PT state message, interpolate the model prediction
-       at the elapsed time and write it to InfluxDB — so the predicted curve
-       advances in lockstep with the observed data on the dashboard.
-    3. Also write velocity, acceleration, and tracking error at each step.
+    1. On LOAD_PROGRAM, pre-compute the full trajectory.
+    2. On the first "Running" state, batch-write the entire model trajectory
+       to InfluxDB at once (with future timestamps).  Grafana reveals each
+       point as wall-clock "now" reaches it, so the red line advances in
+       real-time — perfectly synchronised with PT data.
+    3. While the motion is active, write tracking error per PT state message.
     4. On transition back to "Idle", reset and wait for the next motion.
 
 Measurements written:
@@ -18,6 +19,7 @@ import math
 import time
 import numpy as np
 from scipy.interpolate import interp1d
+from influxdb_client import Point, WritePrecision
 
 from communication.rabbitmq import Rabbitmq
 from communication.protocol import (
@@ -79,6 +81,14 @@ class ModelTrackerService:
         self._q_interp = None         # position
         self._qd_interp = None        # velocity
         self._qdd_interp = None       # acceleration
+
+        # Raw trajectory arrays for batch writing to InfluxDB
+        self._t_raw = None
+        self._q_raw = None
+        self._qd_raw = None
+        self._qdd_raw = None
+        self._t_sync = None           # motion end time; batch write stops here
+        self._trajectory_written = False
 
     # ── lifecycle ─────────────────────────────────────────────────────────
 
@@ -187,14 +197,19 @@ class ModelTrackerService:
                     self._run_model(body)  # last resort: read from state msg
             self._log.info("Motion started")
 
-        # 2) While motion is active, write the model prediction at the
-        #    elapsed time that matches this PT data point.
+        # 2) Batch-write the full model trajectory the first time we see it
+        if (self._motion_active and self._q_interp is not None
+                and not self._trajectory_written):
+            wall_t_start = self._ts_offset_ns + int(self._t_start * 1e9)
+            self._write_full_trajectory(wall_t_start, self._motion_counter)
+
+        # 3) While motion is active, write only tracking error per PT sample
         if self._motion_active and self._q_interp is not None:
             elapsed = timestamp - self._t_start
             wall_ts = self._ts_offset_ns + int(timestamp * 1e9)
-            self._write_prediction(elapsed, q_actual, wall_ts, self._motion_counter)
+            self._write_tracking_error(elapsed, q_actual, wall_ts, self._motion_counter)
 
-        # 3) Detect motion end  (Running → Idle)
+        # 4) Detect motion end  (Running → Idle)
         if (self._motion_active
                 and robot_mode == RobotMode.ROBOT_MODE_IDLE
                 and self._prev_mode == RobotMode.ROBOT_MODE_RUNNING):
@@ -228,6 +243,7 @@ class ModelTrackerService:
         v_eff = np.deg2rad(max_vel) * np.array(vel_scale)
         a_eff = np.deg2rad(acc) * np.array(acc_scale)
         t_sync = self._model.sync_time(distances, v_eff, a_eff)
+        self._t_sync = float(t_sync)  # store for batch-write trimming
         t_end = t_sync * 1.5 + 1.0
 
         t_mod, q_mod, qd_mod, qdd_mod = self._model.simulate_joint_motion(
@@ -241,6 +257,13 @@ class ModelTrackerService:
             acc_scale=acc_scale,
             smooth_tau=smooth_tau,
         )
+
+        # Store raw arrays for the batch write at motion start
+        self._t_raw = t_mod
+        self._q_raw = q_mod
+        self._qd_raw = qd_mod
+        self._qdd_raw = qdd_mod
+        self._trajectory_written = False
 
         # Build linear interpolators so we can sample at arbitrary elapsed times
         self._q_interp = [
@@ -259,32 +282,41 @@ class ModelTrackerService:
             for j in range(NUM_JOINTS)
         ]
 
-    # ── writing predictions ───────────────────────────────────────────────
+    # ── writing ────────────────────────────────────────────────────────────
 
-    def _write_prediction(self, elapsed, q_actual, wall_ts, motion_id):
-        """Interpolate the model at *elapsed* seconds, write prediction + error."""
+    def _write_full_trajectory(self, wall_t_start_ns, motion_id):
+        """Batch-write the model trajectory (up to t_sync) so the red line is
+        instantly available in InfluxDB.  Grafana's ``range(stop: now())``
+        reveals each point as wall-clock time reaches the timestamp.
+        The trajectory is trimmed at t_sync to avoid a flat settling tail."""
+        t_cutoff = self._t_sync + 0.1   # small buffer past the sync point
+        step = max(1, int(0.01 / self._sim_dt))   # write ~every 10 ms
+        records = []
+        for i in range(0, len(self._t_raw), step):
+            if self._t_raw[i] > t_cutoff:
+                break
+            ts_ns = wall_t_start_ns + int(self._t_raw[i] * 1e9)
+            p = (Point(MEASUREMENT_MODEL)
+                 .tag("source", "model"))
+            for j in range(NUM_JOINTS):
+                p = p.field(f"q_j{j}", float(np.rad2deg(self._q_raw[i, j])))
+                p = p.field(f"qd_j{j}", float(np.rad2deg(self._qd_raw[i, j])))
+                p = p.field(f"qdd_j{j}", float(np.rad2deg(self._qdd_raw[i, j])))
+            p = p.time(ts_ns, WritePrecision.NS)
+            records.append(p)
+        self._influx.write_points(records)
+        self._trajectory_written = True
+        self._log.info("Batch-wrote %d model points for motion %d (t_sync=%.2fs)",
+                       len(records), motion_id, self._t_sync)
+
+    def _write_tracking_error(self, elapsed, q_actual, wall_ts, motion_id):
+        """Write only the tracking error (model vs observed) for this PT sample."""
         elapsed = max(0.0, elapsed)
-
-        model_fields = {}
+        tags = {"source": "model", "motion_id": str(motion_id)}
         error_fields = {}
         for j in range(NUM_JOINTS):
             q_pred = float(self._q_interp[j](elapsed))
-            qd_pred = float(self._qd_interp[j](elapsed))
-            qdd_pred = float(self._qdd_interp[j](elapsed))
-
-            model_fields[f"q_j{j}"] = np.rad2deg(q_pred)
-            model_fields[f"qd_j{j}"] = np.rad2deg(qd_pred)
-            model_fields[f"qdd_j{j}"] = np.rad2deg(qdd_pred)
-
             error_fields[f"err_j{j}"] = np.rad2deg(q_pred - q_actual[j])
-
-        tags = {"source": "model", "motion_id": str(motion_id)}
-        self._influx.write_point(
-            measurement=MEASUREMENT_MODEL,
-            fields=model_fields,
-            tags=tags,
-            timestamp_ns=wall_ts,
-        )
         self._influx.write_point(
             measurement=MEASUREMENT_ERROR,
             fields=error_fields,
@@ -299,3 +331,9 @@ class ModelTrackerService:
         self._q_interp = None
         self._qd_interp = None
         self._qdd_interp = None
+        self._t_raw = None
+        self._q_raw = None
+        self._qd_raw = None
+        self._qdd_raw = None
+        self._t_sync = None
+        self._trajectory_written = False

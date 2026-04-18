@@ -2,6 +2,8 @@
 
 import time
 import logging
+import urllib.request
+import urllib.error
 
 from influxdb_client import InfluxDBClient, Point, WritePrecision
 from influxdb_client.client.write_api import SYNCHRONOUS
@@ -22,7 +24,23 @@ class InfluxClient:
 
     # ── lifecycle ─────────────────────────────────────────────────────────
 
+    def _wait_until_ready(self, timeout=60, interval=2):
+        """Poll /health until InfluxDB reports status=pass, or raise on timeout."""
+        health_url = self.url.rstrip("/") + "/health"
+        deadline = time.time() + timeout
+        while time.time() < deadline:
+            try:
+                with urllib.request.urlopen(health_url, timeout=3) as resp:
+                    if resp.status == 200:
+                        return
+            except Exception:
+                pass
+            self._log.info("Waiting for InfluxDB to be ready …")
+            time.sleep(interval)
+        raise TimeoutError(f"InfluxDB at {self.url} did not become ready within {timeout}s")
+
     def connect(self):
+        self._wait_until_ready()
         self._client = InfluxDBClient(url=self.url, token=self.token, org=self.org)
         self._write_api = self._client.write_api(write_options=SYNCHRONOUS)
         self._query_api = self._client.query_api()

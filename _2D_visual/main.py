@@ -19,6 +19,7 @@ Then trigger motions separately:
 
 import argparse
 import logging
+import os
 import threading
 import time
 
@@ -44,7 +45,7 @@ INFLUXDB_CONFIG = {
     "bucket": "ur3e",
 }
 
-MODEL_PARAMS_PATH = "./models/parameters.json"
+MODEL_PARAMS_PATH = os.path.join(os.path.dirname(__file__), "..", "models", "parameters.json")
 
 
 def _start_service_thread(service, name):
