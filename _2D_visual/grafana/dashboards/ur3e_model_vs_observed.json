@@ -35,7 +35,7 @@
           }
         ]
       },
-      "gridPos": {"h": 8, "w": 8, "x": 0, "y": 0},
+      "gridPos": {"h": 8, "w": 8, "x": 0, "y": 3},
       "id": 1,
       "options": {
         "legend": {"calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": true},
@@ -86,7 +86,7 @@
           }
         ]
       },
-      "gridPos": {"h": 8, "w": 8, "x": 8, "y": 0},
+      "gridPos": {"h": 8, "w": 8, "x": 8, "y": 3},
       "id": 2,
       "options": {
         "legend": {"calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": true},
@@ -137,7 +137,7 @@
           }
         ]
       },
-      "gridPos": {"h": 8, "w": 8, "x": 16, "y": 0},
+      "gridPos": {"h": 8, "w": 8, "x": 16, "y": 3},
       "id": 3,
       "options": {
         "legend": {"calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": true},
@@ -188,7 +188,7 @@
           }
         ]
       },
-      "gridPos": {"h": 8, "w": 8, "x": 0, "y": 8},
+      "gridPos": {"h": 8, "w": 8, "x": 0, "y": 14},
       "id": 4,
       "options": {
         "legend": {"calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": true},
@@ -239,7 +239,7 @@
           }
         ]
       },
-      "gridPos": {"h": 8, "w": 8, "x": 8, "y": 8},
+      "gridPos": {"h": 8, "w": 8, "x": 8, "y": 14},
       "id": 5,
       "options": {
         "legend": {"calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": true},
@@ -290,7 +290,7 @@
           }
         ]
       },
-      "gridPos": {"h": 8, "w": 8, "x": 16, "y": 8},
+      "gridPos": {"h": 8, "w": 8, "x": 16, "y": 14},
       "id": 6,
       "options": {
         "legend": {"calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": true},
@@ -310,6 +310,294 @@
       ],
       "title": "Joint 5",
       "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "influxdb", "uid": "influxdb-ur3e"},
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {"text": "Normal", "color": "green", "index": 0},
+                "1": {"text": "Anomaly (Low)", "color": "yellow", "index": 1},
+                "2": {"text": "Anomaly (Medium)", "color": "orange", "index": 2},
+                "3": {"text": "Anomaly (High)", "color": "red", "index": 3}
+              }
+            }
+          ],
+          "noValue": "Normal",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "yellow", "value": 1},
+              {"color": "orange", "value": 2},
+              {"color": "red", "value": 3}
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {"h": 3, "w": 8, "x": 0, "y": 0},
+      "id": 7,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false},
+        "textMode": "value"
+      },
+      "targets": [
+        {
+          "datasource": {"type": "influxdb", "uid": "influxdb-ur3e"},
+          "query": "from(bucket: \"ur3e\")\n  |> range(start: -1h)\n  |> filter(fn: (r) => r._measurement == \"joint_anomaly_status\" and r._field == \"status_j0\")\n  |> last()",
+          "refId": "A"
+        }
+      ],
+      "title": "Joint 0 Status",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "influxdb", "uid": "influxdb-ur3e"},
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {"text": "Normal", "color": "green", "index": 0},
+                "1": {"text": "Anomaly (Low)", "color": "yellow", "index": 1},
+                "2": {"text": "Anomaly (Medium)", "color": "orange", "index": 2},
+                "3": {"text": "Anomaly (High)", "color": "red", "index": 3}
+              }
+            }
+          ],
+          "noValue": "Normal",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "yellow", "value": 1},
+              {"color": "orange", "value": 2},
+              {"color": "red", "value": 3}
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {"h": 3, "w": 8, "x": 8, "y": 0},
+      "id": 8,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false},
+        "textMode": "value"
+      },
+      "targets": [
+        {
+          "datasource": {"type": "influxdb", "uid": "influxdb-ur3e"},
+          "query": "from(bucket: \"ur3e\")\n  |> range(start: -1h)\n  |> filter(fn: (r) => r._measurement == \"joint_anomaly_status\" and r._field == \"status_j1\")\n  |> last()",
+          "refId": "A"
+        }
+      ],
+      "title": "Joint 1 Status",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "influxdb", "uid": "influxdb-ur3e"},
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {"text": "Normal", "color": "green", "index": 0},
+                "1": {"text": "Anomaly (Low)", "color": "yellow", "index": 1},
+                "2": {"text": "Anomaly (Medium)", "color": "orange", "index": 2},
+                "3": {"text": "Anomaly (High)", "color": "red", "index": 3}
+              }
+            }
+          ],
+          "noValue": "Normal",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "yellow", "value": 1},
+              {"color": "orange", "value": 2},
+              {"color": "red", "value": 3}
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {"h": 3, "w": 8, "x": 16, "y": 0},
+      "id": 9,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false},
+        "textMode": "value"
+      },
+      "targets": [
+        {
+          "datasource": {"type": "influxdb", "uid": "influxdb-ur3e"},
+          "query": "from(bucket: \"ur3e\")\n  |> range(start: -1h)\n  |> filter(fn: (r) => r._measurement == \"joint_anomaly_status\" and r._field == \"status_j2\")\n  |> last()",
+          "refId": "A"
+        }
+      ],
+      "title": "Joint 2 Status",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "influxdb", "uid": "influxdb-ur3e"},
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {"text": "Normal", "color": "green", "index": 0},
+                "1": {"text": "Anomaly (Low)", "color": "yellow", "index": 1},
+                "2": {"text": "Anomaly (Medium)", "color": "orange", "index": 2},
+                "3": {"text": "Anomaly (High)", "color": "red", "index": 3}
+              }
+            }
+          ],
+          "noValue": "Normal",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "yellow", "value": 1},
+              {"color": "orange", "value": 2},
+              {"color": "red", "value": 3}
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {"h": 3, "w": 8, "x": 0, "y": 11},
+      "id": 10,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false},
+        "textMode": "value"
+      },
+      "targets": [
+        {
+          "datasource": {"type": "influxdb", "uid": "influxdb-ur3e"},
+          "query": "from(bucket: \"ur3e\")\n  |> range(start: -1h)\n  |> filter(fn: (r) => r._measurement == \"joint_anomaly_status\" and r._field == \"status_j3\")\n  |> last()",
+          "refId": "A"
+        }
+      ],
+      "title": "Joint 3 Status",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "influxdb", "uid": "influxdb-ur3e"},
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {"text": "Normal", "color": "green", "index": 0},
+                "1": {"text": "Anomaly (Low)", "color": "yellow", "index": 1},
+                "2": {"text": "Anomaly (Medium)", "color": "orange", "index": 2},
+                "3": {"text": "Anomaly (High)", "color": "red", "index": 3}
+              }
+            }
+          ],
+          "noValue": "Normal",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "yellow", "value": 1},
+              {"color": "orange", "value": 2},
+              {"color": "red", "value": 3}
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {"h": 3, "w": 8, "x": 8, "y": 11},
+      "id": 11,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false},
+        "textMode": "value"
+      },
+      "targets": [
+        {
+          "datasource": {"type": "influxdb", "uid": "influxdb-ur3e"},
+          "query": "from(bucket: \"ur3e\")\n  |> range(start: -1h)\n  |> filter(fn: (r) => r._measurement == \"joint_anomaly_status\" and r._field == \"status_j4\")\n  |> last()",
+          "refId": "A"
+        }
+      ],
+      "title": "Joint 4 Status",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "influxdb", "uid": "influxdb-ur3e"},
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {"text": "Normal", "color": "green", "index": 0},
+                "1": {"text": "Anomaly (Low)", "color": "yellow", "index": 1},
+                "2": {"text": "Anomaly (Medium)", "color": "orange", "index": 2},
+                "3": {"text": "Anomaly (High)", "color": "red", "index": 3}
+              }
+            }
+          ],
+          "noValue": "Normal",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "yellow", "value": 1},
+              {"color": "orange", "value": 2},
+              {"color": "red", "value": 3}
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {"h": 3, "w": 8, "x": 16, "y": 11},
+      "id": 12,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false},
+        "textMode": "value"
+      },
+      "targets": [
+        {
+          "datasource": {"type": "influxdb", "uid": "influxdb-ur3e"},
+          "query": "from(bucket: \"ur3e\")\n  |> range(start: -1h)\n  |> filter(fn: (r) => r._measurement == \"joint_anomaly_status\" and r._field == \"status_j5\")\n  |> last()",
+          "refId": "A"
+        }
+      ],
+      "title": "Joint 5 Status",
+      "type": "stat"
     }
   ],
   "refresh": "5s",
@@ -321,5 +609,5 @@
   "timezone": "browser",
   "title": "UR3e Model vs Observed",
   "uid": "ur3e-model-vs-observed",
-  "version": 3
+  "version": 4
 }
