@@ -1,0 +1,72 @@
+[gd_scene format=3 uid="uid://cy2ujhvbsk081"]
+
+[ext_resource type="PackedScene" uid="uid://cvk12ijima7h2" path="res://glb/joint_0.glb" id="1_j1sld"]
+[ext_resource type="PackedScene" uid="uid://tqc0gmemyg86" path="res://glb/joint_1.glb" id="2_ruphi"]
+[ext_resource type="PackedScene" uid="uid://b0gdtbhh0jpdp" path="res://glb/joint_2.glb" id="3_kofcx"]
+[ext_resource type="PackedScene" uid="uid://da2msib4agryh" path="res://glb/joint_3.glb" id="4_x363a"]
+[ext_resource type="PackedScene" uid="uid://b8sc0tuu1ri7d" path="res://glb/joint_4.glb" id="5_kb158"]
+[ext_resource type="PackedScene" uid="uid://d0lemr48srtjy" path="res://glb/joint_6.glb" id="6_gmmvc"]
+[ext_resource type="PackedScene" uid="uid://bauxswn2q6n50" path="res://glb/joint_5.glb" id="6_ruphi"]
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_ruphi"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_kofcx"]
+albedo_color = Color(0.61081535, 0.6409165, 3.85046e-07, 1)
+
+[node name="UR3e" type="Node3D" unique_id=1291680447]
+transform = Transform3D(1.0000001, 0, 0, 0, 1, 0, 0, 0, 1.0000001, 0.69649506, 0.029968604, 0.4492595)
+rotation_order = 0
+
+[node name="b" parent="." unique_id=1648939085 instance=ExtResource("1_j1sld")]
+transform = Transform3D(-4.371139e-08, 0.9999999, -1.2621773e-29, 4.371139e-08, 1.9106853e-15, -1.0000001, -1, -4.3711385e-08, -4.3711392e-08, -0.7676531, -0.05905309, -0.13909668)
+rotation_order = 0
+
+[node name="mk_0" type="Marker3D" parent="b" unique_id=72805221]
+transform = Transform3D(0.99976164, 0.021832336, 3.5527137e-15, -0.021832336, 0.99976164, 0, -3.5518669e-15, -7.756404e-17, 1, 0.32133543, 0.06754006, -0.12961681)
+
+[node name="j0" parent="b/mk_0" unique_id=57855712 instance=ExtResource("2_ruphi")]
+unique_name_in_owner = true
+transform = Transform3D(0.9999996, -0.0002967058, 4.3711395e-08, 0.00029670587, 0.9999994, 4.372434e-08, -4.3724363e-08, -4.3711363e-08, 0.9999998, -0.15457483, -0.06617238, -0.18396932)
+rotation_order = 0
+
+[node name="mk_1" type="Marker3D" parent="b/mk_0/j0" unique_id=500582179]
+transform = Transform3D(0.9999437, 4.377216e-08, 0.010471787, -4.4616172e-08, 1.0000004, 8.74179e-08, -0.010471781, -8.788047e-08, 0.99994516, 0.15122283, -0.007949282, 0.13151202)
+
+[node name="j1" parent="b/mk_0/j0/mk_1" unique_id=453354656 instance=ExtResource("3_kofcx")]
+transform = Transform3D(0.9999461, -4.0745363e-10, -0.010471803, 5.820766e-11, 0.9999994, -4.4168893e-08, 0.010471791, 4.416711e-08, 0.99994516, 0.31600475, -0.10358141, -0.15531203)
+rotation_order = 0
+
+[node name="mk_2" type="Marker3D" parent="b/mk_0/j0/mk_1/j1" unique_id=259380126]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.31405506, 0.102842905, -0.08469409)
+
+[node name="j2" parent="b/mk_0/j0/mk_1/j1/mk_2" unique_id=1126857911 instance=ExtResource("4_x363a")]
+transform = Transform3D(0.99994415, -5.820766e-11, 0.010471792, -5.820766e-10, 1.0000005, 4.4165517e-08, -0.01047178, -4.4169088e-08, 0.99994504, -0.084126495, -0.0026699349, 0.009935933)
+rotation_order = 0
+
+[node name="mk_3" type="Marker3D" parent="b/mk_0/j0/mk_1/j1/mk_2/j2" unique_id=875177285]
+transform = Transform3D(0.9999462, -4.0745363e-10, -0.010471803, 1.1641532e-10, 0.9999996, -4.4169003e-08, 0.010471792, 4.416711e-08, 0.9999453, 0.084364444, -0.0006956598, -0.22263609)
+
+[node name="j3" parent="b/mk_0/j0/mk_1/j1/mk_2/j2/mk_3" unique_id=1569557073 instance=ExtResource("5_kb158")]
+transform = Transform3D(0.99994355, -4.947651e-10, 0.010471833, -6.9849193e-10, 1, 8.787583e-08, -0.010471814, -8.787845e-08, 0.99994475, 0.22157824, -0.08775433, 0.20601706)
+rotation_order = 0
+
+[node name="mk_4" type="Marker3D" parent="b/mk_0/j0/mk_1/j1/mk_2/j2/mk_3/j3" unique_id=339770853]
+transform = Transform3D(1.0000001, 0, 0, -2.910383e-11, 1, -2.2737368e-13, 0, 2.2737368e-13, 1, -0.22184351, 0.031791948, -0.24942976)
+
+[node name="j4" parent="b/mk_0/j0/mk_1/j1/mk_2/j2/mk_3/j3/mk_4" unique_id=850144681 instance=ExtResource("6_ruphi")]
+transform = Transform3D(0.9999992, -2.910383e-11, 4.4703484e-08, 0, 1.0000001, 4.371077e-08, -4.284084e-08, -4.371168e-08, 0.99999905, 0.18803306, -0.042961586, 0.2909544)
+rotation_order = 0
+
+[node name="mk_5" type="Marker3D" parent="b/mk_0/j0/mk_1/j1/mk_2/j2/mk_3/j3/mk_4/j4" unique_id=1664985849]
+transform = Transform3D(1, 0, 0, 2.910383e-11, 1, 0, 0, -2.2737368e-13, 1, -0.18844327, -9.1224e-12, -0.33979118)
+
+[node name="j5" parent="b/mk_0/j0/mk_1/j1/mk_2/j2/mk_3/j3/mk_4/j4/mk_5" unique_id=2001613851 instance=ExtResource("6_gmmvc")]
+transform = Transform3D(0.9999999, 4.368485e-08, -4.377216e-08, -4.3713953e-08, 0.9999997, 2.2737368e-13, 4.377216e-08, 0, 1, 0.16767402, -0.04786662, 0.43620223)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=1681852965]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.8054916, -0.058912694, -0.27156255)
+mesh = SubResource("PlaneMesh_ruphi")
+surface_material_override/0 = SubResource("StandardMaterial3D_kofcx")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=2040534392]
+transform = Transform3D(1, 0, 0, 0, 0.18302488, 0.9831083, 0, -0.9831083, 0.18302488, -0.66747046, 1.942019, 0)

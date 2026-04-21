@@ -1,0 +1,21 @@
+[gd_scene format=3 uid="uid://dbcpt2jlntqif"]
+
+[ext_resource type="Script" uid="uid://cilsi86iwpv4h" path="res://ur3e.gd" id="1_h2yge"]
+[ext_resource type="PackedScene" uid="uid://cy2ujhvbsk081" path="res://ur3e.tscn" id="2_1bvp3"]
+[ext_resource type="Script" uid="uid://csa2ffg1l2td6" path="res://RabbitMQListener.cs" id="3_lquwl"]
+[ext_resource type="Script" uid="uid://xgtn5wdsjo22" path="res://camera.gd" id="4_1bvp3"]
+
+[node name="Main" type="Node3D" unique_id=943768161]
+script = ExtResource("1_h2yge")
+
+[node name="UR3e" parent="." unique_id=1291680447 instance=ExtResource("2_1bvp3")]
+unique_name_in_owner = true
+transform = Transform3D(0.9999999, 0, 0, 0, 1, 0, 0, 0, 0.9999999, 0.7180512, 0.0054498315, 0.45294142)
+
+[node name="rmq_listener" type="Node" parent="." unique_id=1209431378]
+script = ExtResource("3_lquwl")
+
+[node name="Camera3D" type="Camera3D" parent="." unique_id=1865575724]
+transform = Transform3D(-0.97483397, 0.12622434, -0.18375574, 0.019511256, 0.8694119, 0.49370265, 0.22207668, 0.4776928, -0.8499951, -0.14688373, 0.80875814, -1.1090716)
+fov = 79.02776
+script = ExtResource("4_1bvp3")
