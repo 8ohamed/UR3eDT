@@ -28,6 +28,7 @@ class JointConfig:
         
         # Create the robot object
         self.robot: DHRobot = rtb.DHRobot(self.links, name="UR3e")
+        
                                 
     # Generate a joint configuration with xyz
     def generate_configuration(self,preset = None, x = None, y = None, z = None, v_max=1, alpha_pt=1):
@@ -51,6 +52,31 @@ class JointConfig:
                     z=0.40
                     self.acc = 40
                     self.vel = [80,90,60,10,20,40]
+                    
+                case -1: 
+                    fkine =  self.robot.fkine([0, 0, 0,0,0,0])
+                    return self.robot.ikine_LM(fkine)
+                case 0: 
+                    fkine =  self.robot.fkine([0, -np.pi/2, 0, -np.pi/2, 0, 0])
+                    return self.robot.ikine_LM(fkine)
+                case 10: # Joint 0 + 90deg 
+                    fkine =  self.robot.fkine([np.pi/2, -np.pi/2, 0, -np.pi/2, 0, 0])
+                    return self.robot.ikine_LM(fkine)
+                case 11: # Joint 1 + 90deg 
+                    fkine =  self.robot.fkine([0, -np.pi/2+np.pi/2, 0, -np.pi/2, 0, 0])
+                    return self.robot.ikine_LM(fkine)
+                case 12: # Joint 2 + 90deg 
+                    fkine =  self.robot.fkine([0, -np.pi/2, 0+np.pi/2, -np.pi/2, 0, 0])
+                    return self.robot.ikine_LM(fkine)
+                case 13: # Joint 3 + 90deg 
+                    fkine =  self.robot.fkine([0, -np.pi/2, 0, -np.pi/2+np.pi/2, 0, 0])
+                    return self.robot.ikine_LM(fkine)
+                case 14: # Joint 4 + 90deg 
+                    fkine =  self.robot.fkine([0, -np.pi/2, 0, -np.pi/2, 0+np.pi/2, 0])
+                    return self.robot.ikine_LM(fkine)
+                case 15: # Joint 5 + 90deg 
+                    fkine =  self.robot.fkine([0, -np.pi/2, 0, -np.pi/2, 0, 0+np.pi/2])
+                    return self.robot.ikine_LM(fkine)
                 case _:
                     print("Preset not available")
                     return None
