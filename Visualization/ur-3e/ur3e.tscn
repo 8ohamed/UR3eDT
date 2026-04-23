@@ -10,8 +10,15 @@
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_ruphi"]
 
+[sub_resource type="AtlasTexture" id="AtlasTexture_ruphi"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_kofcx"]
+
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_kofcx"]
-albedo_color = Color(0.61081535, 0.6409165, 3.85046e-07, 1)
+albedo_color = Color(0.6117647, 0.6392157, 0.61960787, 1)
+albedo_texture = SubResource("AtlasTexture_ruphi")
+metallic = 1.0
+metallic_texture = SubResource("AtlasTexture_kofcx")
 
 [sub_resource type="CylinderMesh" id="CylinderMesh_ruphi"]
 
@@ -30,37 +37,42 @@ transform = Transform3D(1.0000001, 0, 0, 0, 1, 0, 0, 0, 1.0000001, 0.69649506, 0
 transform = Transform3D(-4.371139e-08, 0.9999998, 0, 4.371139e-08, 1.910685e-15, -1.0000001, -1, -4.371138e-08, -4.3711392e-08, -0.7592709, -0.05905309, -0.13921857)
 
 [node name="mk_0" type="Marker3D" parent="b" unique_id=72805221]
+unique_name_in_owner = true
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.32133543, 0.06754006, -0.12961681)
 
 [node name="j0" parent="b/mk_0" unique_id=57855712 instance=ExtResource("2_ruphi")]
-unique_name_in_owner = true
 transform = Transform3D(0.9999995, -0.0002967058, 4.37114e-08, 0.00029670587, 0.99999934, 4.3724352e-08, -4.372436e-08, -4.371136e-08, 0.9999998, -0.15457483, -0.06617238, -0.18396932)
 
 [node name="mk_1" type="Marker3D" parent="b/mk_0/j0" unique_id=500582179]
-transform = Transform3D(0.9999437, 4.369839e-08, 0.010471797, -4.4616172e-08, 1.0000004, 8.7417256e-08, -0.010471781, -8.78797e-08, 0.99994516, 0.15122283, -0.007949282, 0.13151202)
+unique_name_in_owner = true
+transform = Transform3D(0.9999985, 0, 0, 0, 1.0000004, 0, 0, 0, 1, 0.15122283, -0.007949282, 0.13151202)
 
 [node name="j1" parent="b/mk_0/j0/mk_1" unique_id=453354656 instance=ExtResource("3_kofcx")]
 transform = Transform3D(0.9999461, -5.207319e-10, -0.010471781, 5.820766e-11, 0.9999994, -4.4168978e-08, 0.010471791, 4.416592e-08, 0.99994516, 0.31600475, -0.10358141, -0.15531203)
 
 [node name="mk_2" type="Marker3D" parent="b/mk_0/j0/mk_1/j1" unique_id=259380126]
+unique_name_in_owner = true
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.31405506, 0.102842905, -0.08469409)
 
 [node name="j2" parent="b/mk_0/j0/mk_1/j1/mk_2" unique_id=1126857911 instance=ExtResource("4_x363a")]
 transform = Transform3D(0.99994415, 1.1953513e-10, 0.010471789, -5.820766e-10, 1.0000005, 4.416725e-08, -0.01047178, -4.417095e-08, 0.99994504, -0.084126495, -0.0026699349, 0.009935933)
 
 [node name="mk_3" type="Marker3D" parent="b/mk_0/j0/mk_1/j1/mk_2/j2" unique_id=875177285]
-transform = Transform3D(0.9999462, -4.0745363e-10, -0.010471803, 1.1641532e-10, 0.9999996, -4.4169003e-08, 0.010471792, 4.416711e-08, 0.9999453, 0.084364444, -0.0006956598, -0.22263609)
+unique_name_in_owner = true
+transform = Transform3D(1.000001, 0, 0, 0, 0.9999996, 0, 0, 0, 1.0000001, 0.084364444, -0.0006956598, -0.22263609)
 
 [node name="j3" parent="b/mk_0/j0/mk_1/j1/mk_2/j2/mk_3" unique_id=1569557073 instance=ExtResource("5_kb158")]
 transform = Transform3D(0.99994355, -2.2179741e-10, 0.010471827, -6.9849193e-10, 1, 8.7878774e-08, -0.010471815, -8.7881304e-08, 0.99994475, 0.22157824, -0.08775433, 0.20601706)
 
 [node name="mk_4" type="Marker3D" parent="b/mk_0/j0/mk_1/j1/mk_2/j2/mk_3/j3" unique_id=339770853]
+unique_name_in_owner = true
 transform = Transform3D(1.0000001, 0, 0, -2.910383e-11, 1, -2.2737368e-13, 0, 2.2737368e-13, 1, -0.22184351, 0.031791948, -0.24942976)
 
 [node name="j4" parent="b/mk_0/j0/mk_1/j1/mk_2/j2/mk_3/j3/mk_4" unique_id=850144681 instance=ExtResource("6_ruphi")]
 transform = Transform3D(0.9999992, -1.8726465e-15, 4.2840828e-08, 0, 1.0000001, 4.3711633e-08, -4.284084e-08, -4.371168e-08, 0.99999905, 0.18803306, -0.042961586, 0.2909544)
 
 [node name="mk_5" type="Marker3D" parent="b/mk_0/j0/mk_1/j1/mk_2/j2/mk_3/j3/mk_4/j4" unique_id=1664985849]
+unique_name_in_owner = true
 transform = Transform3D(1, 0, 0, 2.910383e-11, 1, 0, 0, -2.2737368e-13, 1, -0.18844327, -9.1224e-12, -0.33979118)
 
 [node name="j5" parent="b/mk_0/j0/mk_1/j1/mk_2/j2/mk_3/j3/mk_4/j4/mk_5" unique_id=2001613851 instance=ExtResource("6_gmmvc")]
@@ -77,12 +89,12 @@ transform = Transform3D(0.86602545, 5.856215e-09, -0.49999997, 0.49999997, -2.18
 [node name="DirectionalLight3D2" type="DirectionalLight3D" parent="." unique_id=1780610446]
 transform = Transform3D(0.86602545, -5.856215e-09, 0.49999997, -0.49999997, -2.1855692e-08, 0.86602545, 5.856215e-09, -1, -2.1855692e-08, 1, 3.05, 0.206)
 
-[node name="BoxA" type="MeshInstance3D" parent="." unique_id=1504236321]
+[node name="Box1" type="MeshInstance3D" parent="." unique_id=1504236321]
 transform = Transform3D(0.019982034, 0, 0.19899929, 0, 0.01, 0, -0.19899929, 0, 0.019982034, -1.0261123, -0.06524821, -0.85791683)
 mesh = SubResource("CylinderMesh_ruphi")
 surface_material_override/0 = SubResource("StandardMaterial3D_x363a")
 
-[node name="BoxB" type="MeshInstance3D" parent="." unique_id=1681249005]
+[node name="Box2" type="MeshInstance3D" parent="." unique_id=1681249005]
 transform = Transform3D(0.2, 0, 0, 0, 0.01, 0, 0, 0, 0.2, -0.88804895, -0.0678491, -0.04091823)
 mesh = SubResource("CylinderMesh_kofcx")
 surface_material_override/0 = SubResource("StandardMaterial3D_kb158")
