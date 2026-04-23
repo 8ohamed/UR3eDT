@@ -57,7 +57,6 @@ if __name__ == "__main__":
     
     consumer_thread = threading.Thread(target=visualization.consumer_thread, daemon=True)
     consumer_thread.start()
-    
-    test= input("WAITING FOR ENTER")
+
     while True:
         visualization.visualize()

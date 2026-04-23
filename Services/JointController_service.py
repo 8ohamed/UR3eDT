@@ -139,7 +139,8 @@ class JointController():
         except Exception as e:
             print(f"✗ Failed to send control message: {e}")
             self.setup()
-            self.program()
+            self.send_control_message(msg)
+            # self.program()
 
     def cont_movement(self):
         preset = 1
