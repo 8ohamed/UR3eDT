@@ -1,0 +1,7 @@
+apiVersion: 1
+providers:
+  - name: ur3e-dashboards
+    folder: UR3e DT
+    type: file
+    options:
+      path: /etc/grafana/provisioning/dashboards

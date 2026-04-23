@@ -215,3 +215,7 @@ examples/
 startup\
 notes.txt
 models/1_configuration_gen.ipynb
+=======
+ur3e_mockup/
+startup/
+>>>>>>> d1d0220657e845ce84408620ff58bb2c29c4a80f
