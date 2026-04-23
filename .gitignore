@@ -212,6 +212,7 @@ Assignment/
 
 # Files
 examples/
+<<<<<<< HEAD
 startup\
 notes.txt
 models/1_configuration_gen.ipynb
